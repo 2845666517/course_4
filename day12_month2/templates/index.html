@@ -1,0 +1,382 @@
+<html>
+
+<head>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #wrap {
+            width: 100%;
+            height: 100%;
+            background-color: black;
+            overflow: scroll;
+        }
+
+        div.line {
+            width: 1000px;
+            margin: 0 auto;
+            height: 350px;
+            position: relative;
+        }
+
+        div.sm-chart {
+            width: 50%;
+            height: 100%;
+            background-color: rgb(226, 226, 226);
+            position: absolute;
+            box-sizing: border-box;
+            padding: 10px;
+        }
+
+        div.sm-chart.right {
+            top: 0;
+            right: 0;
+        }
+
+        div.chart-wrap {
+            width: 100%;
+            height: 100%;
+            background-color: white;
+        }
+
+        div#head {
+            width: 100%;
+            height: 60px;
+            background-color: #06519a;
+            position: relative;
+        }
+
+        div.logo {
+            width: 200px;
+            font-weight: bolder;
+            color: silver;
+            height: 100%;
+            display: inline-block;
+            line-height: 60px;
+            margin-left: 20px;
+        }
+
+        div.greeting {
+            color: white;
+            font-size: 12px;
+            position: absolute;
+            right: 10px;
+            height: 100%;
+            width: 100px;
+            top: 0px;
+            margin: 0;
+            padding: 0;
+            line-height: 60px;
+            display: inline-block;
+        }
+
+        div#data-city-money-compare {
+            overflow-x: scroll;
+            background-color: #fffff6;
+        }
+
+        div#data-city-money-compare table {
+            border-collapse: collapse;
+            border-spacing: 0;
+            border: 1px solid silver;
+            margin: 20px;
+        }
+
+        div#data-city-money-compare table td, div#data-city-money-compare table th {
+            padding: 5px;
+            color: gray;
+            font-size: 13px;
+        }
+    </style>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/echarts.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/echarts-wordcloud.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-3.6.0.min.js') }}"></script>
+</head>
+<body>
+<div id="wrap">
+    <div id="head">
+        <div class="logo">招聘数据分析系统</div>
+        <div class="greeting">您好，管理员</div>
+    </div>
+    <div class="line">
+        <div class="sm-chart left">
+            <div class="chart-wrap" id="data-city"></div>
+        </div>
+        <div class="sm-chart right">
+            <div class="chart-wrap" id="data-word-cloud"></div>
+        </div>
+    </div>
+    <div class="line">
+        <div class="sm-chart left">
+            <div class="chart-wrap" id="data-city-avg-money"></div>
+        </div>
+        <div class="sm-chart right">
+            <div class="chart-wrap" id="data-education"></div>
+        </div>
+    </div>
+    <div class="line">
+
+    </div>
+</div>
+<script type="text/javascript">
+    (function () {
+        // 基于准备好的dom，初始化echarts实例
+        var myChart = echarts.init(document.getElementById('data-city'));
+
+        // 指定图表的配置项和数据
+        var option = {
+            title: {
+                text: '价格分布',
+                // subtext: 'Fake Data',
+                left: 'left'
+            },
+            dataZoom: {
+                type: "slider",//slider表示有滑动块的，
+                show: true,
+                xAxisIndex: [0],//表示x轴折叠
+                start: 1,//数据窗口范围的起始百分比,表示1%
+                end: 35//数据窗口范围的结束百分比,表示35%坐标
+            },
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'shadow'
+                }
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            xAxis: [
+                {
+                    type: 'category',
+                    data: [],
+                    axisTick: {
+                        alignWithLabel: true
+                    }
+                }
+            ],
+            yAxis: [
+                {
+                    type: 'value'
+                }
+            ],
+            series: [
+                {
+                    name: '数量',
+                    type: 'bar',
+                    barWidth: '60%',
+                    data: []
+                }
+            ]
+        };
+        // 发起ajax请求数据库
+        $.get('/car_19', function (e) {
+            for (var i = 0; i < e.data.x.length; i++) {
+                console.log(option)
+                option.xAxis[0].data.push(e.data.x[i])
+                option.series[0].data.push(e.data.y[i])
+            }
+
+            // 使用刚指定的配置项和数据显示图表。
+            myChart.setOption(option);
+        })
+
+
+    })();
+
+    (function () {
+        // 基于准备好的dom，初始化echarts实例
+        var myChart = echarts.init(document.getElementById('data-city-avg-money'));
+
+        // 指定图表的配置项和数据
+        var option = {
+            title: {
+                text: '每个品牌车型数量',
+                // subtext: 'Fake Data',
+                left: 'left'
+            },
+            dataZoom: {
+                type: "slider",//slider表示有滑动块的，
+                show: true,
+                xAxisIndex: [0],//表示x轴折叠
+                start: 1,//数据窗口范围的起始百分比,表示1%
+                end: 35//数据窗口范围的结束百分比,表示35%坐标
+            },
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'shadow'
+                }
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            xAxis: [
+                {
+                    type: 'category',
+                    data: [],
+                    axisTick: {
+                        alignWithLabel: true
+                    }
+                }
+            ],
+            yAxis: [
+                {
+                    type: 'value'
+                }
+            ],
+            series: [
+                {
+                    name: '小区',
+                    type: 'line',
+                    barWidth: '60%',
+                    data: []
+                }
+            ]
+        };
+
+        // 发起ajax请求数据库
+        $.get('/get_26', function (e) {
+            for (var i = 0; i < e.data.x.length; i++) {
+
+                option.xAxis[0].data.push(e.data.x[i])
+                option.series[0].data.push(e.data.y[i])
+            }
+
+            // 使用刚指定的配置项和数据显示图表。
+            myChart.setOption(option);
+        })
+    })();
+
+
+    (function () {
+        // 基于准备好的dom，初始化echarts实例
+        var myChart = echarts.init(document.getElementById('data-education'));
+
+        // 指定图表的配置项和数据
+        var option = {
+            title: {
+                text: '汽车的市场占比',
+                // subtext: 'Fake Data',
+                left: 'left'
+            },
+            tooltip: {
+                trigger: 'item'
+            },
+            // legend: {
+            //     orient: 'vertical',
+            //     left: 'left'
+            // },
+            series: [
+                {
+                    name: '统计汽车品牌占比情况',
+                    type: 'pie',
+                    radius: '50%',
+                    data: [],
+                    emphasis: {
+                        label: {
+                            show: true
+                        }
+                    },
+                    label: {
+                        normal: {
+                            formatter: '{b}:{c}: ({d}%)',
+                            textStyle: {
+                                fontWeight: 'normal',
+                                fontSize: 12
+                            }
+                        }
+                    },
+                    itemStyle: {},
+                    emphasis: {
+                        itemStyle: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    }
+                }
+            ]
+        };
+        // 发起ajax请求数据库
+        $.get('/get_25', function (e) {
+
+            for (var i = 0; i < e.data.x.length; i++) {
+                option.series[0].data.push({value: e.data.y[i], name: e.data.x[i]})
+            }
+
+            console.log(option.series.data)
+
+            // 使用刚指定的配置项和数据显示图表。
+            myChart.setOption(option);
+        })
+    })();
+
+
+    (function () {
+        //基于准备好的dom，初始化ECharts图表
+        var myChart = echarts.init(document.getElementById("data-word-cloud"));
+        var option = {  //指定图表的配置项和数据
+            backgroundColor: 'rgba(128, 128, 128, 0.1)',  //rgba设置透明度0.1
+            title: {  //配置标题组件
+                text: '统计汽车品牌',
+                x: 'center', y: 15,
+                textStyle: {
+                    color: 'green', fontSize: 22,
+                }
+            },
+            tooltip: {show: true},  //配置提示框组件
+            series: [{  //数据系列及其配置
+                name: '小区名称',  //设置名称
+                type: 'wordCloud',  //设置图表类型为字云图
+                sizeRange: [15, 100],  //设置数据大小范围
+                size: ['80%', '80%'],  //设置显示的字云图的大小
+                textRotation: [0, 45, 90, 135, -45, -90],  //设置文字倾斜角度
+                textPadding: 3,  //设置文字之间的间距
+                autoSize: {enable: true, minSize: 5},  //设置文字的自动大小
+                textStyle: {
+                    normal: {
+                        color: function () {
+                            return 'rgb(' + [
+                                Math.round(Math.random() * 255),
+                                Math.round(Math.random() * 255),
+                                Math.round(Math.random() * 255)
+                            ].join(',') + ')';
+                        }
+                    },
+                    emphasis: {
+                        shadowBlur: 26,
+                        color: '#333',
+                        shadowColor: '#ccc',
+                        fontSize: 20
+                    }
+                },
+                data: [  //设置具体的数据
+                    // { name: "Java", value: 16884 }
+                ]  //data结束
+            }]  //series结束
+        };  //option结束
+
+        $.get('/get_24', function (e) {
+
+            for (var i = 0; i < e.data.x.length; i++) {
+                console.log(i)
+                option.series[0].data.push({value: e.data.y[i], name: e.data.x[i]})
+            }
+
+            // 使用刚指定的配置项和数据显示图表。
+            myChart.setOption(option);
+        })
+    })();
+
+</script>
+</body>
+</html>
